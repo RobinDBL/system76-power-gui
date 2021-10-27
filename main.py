@@ -4,6 +4,10 @@
 import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
+import os
+import subprocess
+import asyncio
+import time
 
 
 class Handler:
@@ -15,10 +19,35 @@ class Handler:
          ouraboutwindow.hide()
     def apply_button_is_clicked(self, button):
         comboboxtext = builder.get_object("comboboxtext1")
-        print(comboboxtext.get_active_text())
+        combobox_active_contents = comboboxtext.get_active_text()
+        window.hide()
+
+        if (combobox_active_contents.strip() == "dedicated"):
+            clioutput = subprocess.Popen(["system76-power", "graphics" , "nvidia"])
+        else:
+            clioutput = subprocess.Popen(["system76-power", "graphics" , combobox_active_contents.strip()])
+
+        #clioutput.communicate()
+
+        rebootwindow.run()
+        rebootwindow.hide()
+        
 
     def cancel_button_is_clicked(self, button):
         window.destroy()
+
+    def rebootNow_button_is_clicked(self, button):
+        rebootwindow.hide()
+        window.destroy()
+        time.sleep(25)
+        os.system("shutdown -r now")
+
+    def rebootLater_button_is_clicked(self, button):
+        rebootwindow.hide()
+        window.destroy()
+
+    def closeWait_button_is_clicked(self, button):
+        confirmwindow.hide()
 
 ## Nothing new here.. We just imported the 'ui.glade' file.
 builder = Gtk.Builder()
@@ -46,6 +75,8 @@ ourcomboboxtext.set_active(0)
 
 ## We just imported the about window here to the 'ouraboutwindow' global variable.
 ouraboutwindow = builder.get_object("aboutdialog1")
+rebootwindow = builder.get_object("rebootdialog1")
+confirmwindow = builder.get_object("confirmdialog1")
 
 ## Give that developer a cookie !
 window.connect("destroy", Gtk.main_quit)
